@@ -110,7 +110,7 @@ Because git is a distributed system, repositories are portable simply by moving 
 Multiple Workflows
 ===
 
-Centralized
+# Centralized
 
 ```mermaid +render
 flowchart TD
@@ -125,7 +125,7 @@ flowchart TD
 Multiple Workflows
 ===
 
-### Integration manager
+# Integration manager
 
 Often seen with open source or GitHub repositories.
 
@@ -133,7 +133,7 @@ Often seen with open source or GitHub repositories.
 
 <!-- pause -->
 
-### Dictator and Lieutenants (Huge projects)
+# Dictator and Lieutenants (Huge projects)
 
 ![Dictator and Lieutenants workflow](img/workflow-c.png)
 
@@ -172,11 +172,13 @@ Then tell Git to initialize your named repo:
 git init workshop
 ```
 
-`git init` with no argument will initialize a blank repo inside the current directory, or create one if it doesn't exist.  All of the git-specific data lives in the `.git` folder:
+`git init` with no argument will initialize a blank repo inside the current directory, or create one if it doesn't exist.
+
+<!-- pause -->
+All of the git-specific data lives in the `.git` folder:
 
 ```bash
-$ cd workshop
-$ ls -la
+$ ls -la .git
 total 64K
 drwxrwxr-x 7 rechner rechner 4.0K Oct 29 11:57 .
 drwxrwxr-x 3 rechner rechner 4.0K Oct 29 11:57 ..
@@ -228,3 +230,264 @@ Chekov, Status!
 ```bash +exec
 git status
 ```
+
+<!-- end_slide -->
+RTFM, BTW
+===
+
+Git has an excellent built-in help system that describes the extended usage of all of these commands.
+
+Quick reference:
+
+```bash +exec
+git help
+```
+
+<!-- end_slide -->
+Full manual pages:
+
+```bash +exec
+git help init
+```
+
+<!-- end_slide -->
+Staging changes
+===
+
+Save yourself a lot of headache with an initial, blank commit.  Make some folders, `touch` 
+some empty files, start a README, get the ball rolling!
+
+```bash +exec
+touch README.md
+git status
+```
+
+Stage your changes by using `git add`, then `status` will show you what's staged:
+```bash +exec
+git add README.md
+git status
+```
+
+<!-- end_slide -->
+
+Committing
+===
+
+```bash
+git commit -m "First commit"
+```
+
+The `-m` flag specifies a **commit message.**
+If you run `git commit` with no arguments, git will prompt for a commit message in the default editor (likely Nano).
+
+Type a short, descriptive commit message.  Extended commit messages can be included after a few blank lines with the editor.
+
+Git will likely ask you to configure who you are first:
+
+```
+*** Please tell me who you are.
+
+    Run
+
+      git config --global user.email "you@example.com"
+      git config --global user.name "Your Name"
+```
+
+Note that Git can store configuration either globally, or on a per-repo basis.
+
+After configuring your name and email, run `git commit` again.
+
+After committing, we can see the commit history with:
+
+```bash +exec
+git log
+```
+
+<!-- end_slide -->
+
+Branching
+===
+
+Commits can be organized into multiple lines of development called **branches**.
+
+Git allows and encourages you to have multiple local branches that can be entirely independent of each other. The creation, merging, and deletion of those lines of development takes seconds.
+
+<!-- incremental_lists: true -->
+This makes it easy to do things like:
+* **Effortless context switching**: Create a branch to try out a new idea, switch back, apply a patch, switch back to where you are experimenting, and merge that in.
+* **Role-Based code lines**: Have a branch dedicated for production, and several smaller ones for day-to-day work.
+* **Feature-based workflows**: Create a new branch for each feature you're working on so you can switch back and forth between them, then delete a feature branch once that's merged into your main line.
+* **Disposable experimentation**: Create a branch to experiment in, realize it's not going to work and abandon it without anyone seeing your shame.
+<!-- incremental_lists: false -->
+
+Create a branch at any point based on an existing one with `git branch`:
+
+Switch between branches with `checkout` (or the experimiental `switch`)
+
+You can quickly create and checkout a new branch with `checkout -b`:
+```bash
+git checkout -b rechner/feature
+```
+
+<!-- pause -->
+
+# Default branch
+
+Git can configure a default branch, historically called `master`.  It is recommended to use the less antiquated name `main` instead.  The Windows installer may have already asked you this question.
+
+Configure the default branch name globally with:
+```bash
+git config --global init.defaultBranch main
+```
+
+<!-- end_slide -->
+
+Branching (continued)
+===
+
+Let's create a new branch and add some changes:
+
+```bash
+git checkout -b feature
+
+# Edit README.md to include some new content
+
+# Then, create more files:
+touch A.md B.md
+
+# Stage them for commit:
+git add README.md A.md B.md
+
+# You can also stage everything untracked with `git add -a`
+```
+
+Check where you are with `status:`
+
+```bash +exec
+git status
+```
+
+Create a commit on your new branch:
+```bash
+git commit -m "Added new feature"
+```
+
+List branches:
+```bash
+git branch
+```
+
+<!-- end_slide -->
+Merging
+===
+
+`git merge` incorporates changes from the named commits into the current branch.
+
+There's a variety of strategies for merging changes (git will usually pick the best one for you).
+
+```
+    commit
+    commit
+    branch feature
+    commit
+    commit
+    checkout main
+    commit
+    commit
+    merge feature
+```
+
+```mermaid +render
+gitGraph
+    commit
+    commit
+    branch feature
+    commit
+    commit
+    checkout main
+    commit
+    commit
+    merge feature
+```
+
+<!-- end_slide -->
+
+Fuck, go back!
+===
+
+# Checkout the past
+You can check out a past commit with `checkout` and the commit SHA.  Look back through the history with `log`.
+
+A **commit SHA** is a cryptographic hash which identifies commits uniquely, as a part of git's data integrity.
+Impossible to change any file, date commit message, without changing the IDs of everything after it.
+
+It can be long, like `1d4ba2708c30dde9243743c759bcf75ef11f95c1`, or abbreviated to the first ~7 or so characters like `1d4ba27`.
+
+You can temporarily check out any past commit by referencing its SHA:
+
+```bash
+git checkout 1d4ba27
+```
+
+This will get you into a so-called "floating head" state.  What you do from there is up to you:
+* Make changes
+* Base a new branch from this point
+* Use a `revert` commit to remove changes introduced by a commit
+* Something more permanent...
+
+<!-- end_slide -->
+
+Git demystified
+===
+
+## The Three Trees
+
+Git as a system manages and manipulates three trees in its normal operation:
+
+|Tree | Role |
+|-----|------|
+|HEAD| Last commit snapshot, next parent|
+|Index| Proposed next commit snapshot|
+|Working directory| Sandbox |
+
+
+### HEAD
+The **HEAD** is a pointer to the current branch reference, which in turn is a pointer to the last commit made on that branch.
+
+This means HEAD will be the parent of the next commit.  (Think of this as the snapshot of your last commit on that branch.)
+<!-- pause -->
+
+### Index
+The **index** is your **proposed next commit**, or the "staging" area.  This is what Git looks at when you run `git status` or `git commit`.
+
+<!-- pause -->
+### The Working Directory
+While the other two "trees" store their content in the .git folder, the **working directory** or **working tree** unpacks them into actual files that you can work on.  It's the sandbox where you can try changes out before committing them to staging and eventually the history.
+
+<!-- pause -->
+## Reset
+
+These terms will be important for using `git reset` later when undoing some operations with git, including unstaging changes for commit, or discarding working changes.
+
+<!-- end_slide -->
+
+Remotes
+===
+A git `remote` lets git sync your local repo with other developers.  A remote can be another folder on your machine, but is most useful as a network remote supported by some optional protocols:
+* SSH
+* HTTP(S)
+* git protocol (bad and deprecated, don't use this!)
+
+I recommend sticking to **SSH** with remotes like Github.
+
+Remotes enable these operations:
+ * `pull`
+ * `push`
+
+<!-- end_slide -->
+Cloning
+===
+
+<!-- end_slide -->
+Rebasing
+===
