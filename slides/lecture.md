@@ -50,6 +50,34 @@ Funny enough, also how Mercurial was born.
 
 <!-- end_slide -->
 
+What's Git Good for?
+===
+
+# The obvious:
+<!-- incremental_lists: true -->
+* Developing software and versioning code
+  * Anything you do more than twice, automate it.
+* Managing and versioning text-based configuration
+* Content for your website without a CMS
+* Making a video game with big resources like models (Using LFS)
+  * Git Large File Storage is an extension that makes versioning large files efficiently.
+
+<!-- pause -->
+
+# Less common:
+* Keeping a journal
+* Versioning proprietary or binary file formats
+* Writing acadmeic papers
+* Tracking changes to legal code
+* Versioning multiple installs of Kerbal Space Program
+* Explain movie plots [1]
+<!-- incremental_lists: false -->
+
+# References
+1: https://hashrocket.com/blog/posts/edge-of-tomorrow-explained-in-git
+
+<!-- end_slide -->
+
 Basic concepts overview
 ===
 
@@ -61,7 +89,8 @@ Basic concepts overview
 * Remotes
   * Pulling
   * Pushing
-* Rebasing
+* Reset
+* Rebase
 
 
 <!-- pre-rendered version
@@ -172,7 +201,7 @@ Then tell Git to initialize your named repo:
 git init workshop
 ```
 
-`git init` with no argument will initialize a blank repo inside the current directory, or create one if it doesn't exist.
+`git init` with no argument will initialize a blank repo inside the current directory.  Here the `workshop` argument will init the `workshop` dir, or create one if it doesn't exist.
 
 <!-- pause -->
 All of the git-specific data lives in the `.git` folder:
@@ -214,7 +243,10 @@ flowchart TD
     style C fill:#00909a, color:white
 ```
 
-<!-- pause -->
+<!-- end_slide -->
+
+# All the world's a stage... (continued)
+
 
 Of course, Git also makes it easy to ignore this feature if you don't want that kind of control with `git commit -a`.
 
@@ -262,11 +294,27 @@ touch README.md
 git status
 ```
 
+<!-- end_slide -->
+Staging changes
+===
+
 Stage your changes by using `git add`, then `status` will show you what's staged:
 ```bash +exec
 git add README.md
 git status
 ```
+
+There's a couple other operations for staging besides `add`:
+
+```bash
+# Stage a file for removal from your repo:
+git rm hello.c
+
+# Move a file inside your index (e.g. rename)
+git mv README.md INSTALL.md
+```
+
+Note that for `mv`, git usually will notice if a file gets renamed outside of git and stage the move for you, but it's safer to do `git mv` to make sure the file's commit history comes with it.
 
 <!-- end_slide -->
 
@@ -282,7 +330,13 @@ If you run `git commit` with no arguments, git will prompt for a commit message 
 
 Type a short, descriptive commit message.  Extended commit messages can be included after a few blank lines with the editor.
 
-Git will likely ask you to configure who you are first:
+
+<!-- end_slide -->
+
+Committing
+===
+
+Git will likely ask you to configure who you are the first time you try to commit:
 
 ```
 *** Please tell me who you are.
@@ -296,6 +350,11 @@ Git will likely ask you to configure who you are first:
 Note that Git can store configuration either globally, or on a per-repo basis.
 
 After configuring your name and email, run `git commit` again.
+
+
+<!-- end_slide -->
+Committing
+===
 
 After committing, we can see the commit history with:
 
@@ -312,8 +371,9 @@ Commits can be organized into multiple lines of development called **branches**.
 
 Git allows and encourages you to have multiple local branches that can be entirely independent of each other. The creation, merging, and deletion of those lines of development takes seconds.
 
-<!-- incremental_lists: true -->
 This makes it easy to do things like:
+<!-- pause -->
+<!-- incremental_lists: true -->
 * **Effortless context switching**: Create a branch to try out a new idea, switch back, apply a patch, switch back to where you are experimenting, and merge that in.
 * **Role-Based code lines**: Have a branch dedicated for production, and several smaller ones for day-to-day work.
 * **Feature-based workflows**: Create a new branch for each feature you're working on so you can switch back and forth between them, then delete a feature branch once that's merged into your main line.
@@ -329,9 +389,10 @@ You can quickly create and checkout a new branch with `checkout -b`:
 git checkout -b rechner/feature
 ```
 
-<!-- pause -->
+<!-- end_slide -->
 
-# Default branch
+Default branch
+===
 
 Git can configure a default branch, historically called `master`.  It is recommended to use the less antiquated name `main` instead.  The Windows installer may have already asked you this question.
 
@@ -360,6 +421,8 @@ git add README.md A.md B.md
 
 # You can also stage everything untracked with `git add -a`
 ```
+
+<!-- end_slide -->
 
 Check where you are with `status:`
 
@@ -416,12 +479,14 @@ Fuck, go back!
 ===
 
 # Checkout the past
-You can check out a past commit with `checkout` and the commit SHA.  Look back through the history with `log`.
+You can check out a past commit with `checkout` and the commit SHA.  Look back through the commit history with `log`, and drill down to changes with `show`.
 
 A **commit SHA** is a cryptographic hash which identifies commits uniquely, as a part of git's data integrity.
 Impossible to change any file, date commit message, without changing the IDs of everything after it.
 
 It can be long, like `1d4ba2708c30dde9243743c759bcf75ef11f95c1`, or abbreviated to the first ~7 or so characters like `1d4ba27`.
+
+<!-- pause -->
 
 You can temporarily check out any past commit by referencing its SHA:
 
@@ -434,6 +499,17 @@ This will get you into a so-called "floating head" state.  What you do from ther
 * Base a new branch from this point
 * Use a `revert` commit to remove changes introduced by a commit
 * Something more permanent...
+
+<!-- pause -->
+
+# Checkout specific files
+
+`checkout` can also be used to restore only certain paths/files to a previous commit:
+
+```bash
+git checkout cf2352 -- main.c resources/sounds
+git checkout origin/main -- src/hello.rs
+```
 
 <!-- end_slide -->
 
@@ -478,16 +554,79 @@ A git `remote` lets git sync your local repo with other developers.  A remote ca
 * HTTP(S)
 * git protocol (bad and deprecated, don't use this!)
 
-I recommend sticking to **SSH** with remotes like Github.
+I recommend sticking to **SSH** with remotes like Github.  Set up an SSH key so you don't have to type your password every time.
 
 Remotes enable these operations:
  * `pull`
  * `push`
 
+You can check what remotes are configured for a repo with:
+```bash +exec
+git remote -v
+```
+
 <!-- end_slide -->
 Cloning
 ===
 
+Cloning will likely cover 80% of git operations as a maker trying out or getting started contributing to someone else's cool project.
+
+You'll need the URL for the repo, for HTTP it looks like a link like this:
+
+```
+https://github.com/USER/REPO.git
+```
+
+For SSH, it looks like this:
+
+```
+git@github.com:/USER/REPO.git
+```
+
+Then clone the repo:
+
+```bash
+git clone git@github.com:/USER/REPO.git [destination]
+```
+
 <!-- end_slide -->
-Rebasing
+Reset
 ===
+
+```mermaid +render
+
+sequenceDiagram
+    participant Working Directory
+    participant Staging
+    Working Directory ->>+Staging: git add/rm/mv
+    Staging->>+Local Repository: git commit
+    Working Directory--> Local Repository: git commit -a
+    Local Repository ->>+ Remote Repository: git push
+    Remote Repository ->>+ Local Repository: git pull
+    Remote Repository ->>+ Local Repository: git fetch
+    Local Repository ->>+ Working Directory: git reset --hard
+    Local Repository ->>+ Working Directory: git reset <commit>
+    Staging ->>+ Working Directory: git reset <file>
+    Staging ->>+ Local Repository: git checkout files
+    Working Directory <<->>+ Local Repository: git diff HEAD
+    Working Directory <<->>+ Staging: git diff
+```
+
+<!-- end_slide -->
+Reset
+===
+
+`reset` is used to reset index entries for particular paths.
+
+```
+# The opposite of `git add README.md`:
+git reset README.md
+
+# Reset in this form resets the current branch head to <commit>
+git reset --soft v0.1
+```
+
+A soft reset does not touch the index file or working tree
+at all (but only resets HEAD to the named commit).  This leaves all your changed files "Changes to be committed".
+
+
